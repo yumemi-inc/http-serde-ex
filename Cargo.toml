@@ -1,0 +1,20 @@
+[package]
+name = "http-serde"
+version = "1.0.0"
+authors = ["Kornel <kornel@geekhood.net>"]
+edition = "2018"
+description = "Serde support for the http crate. (De)serialize HeaderMap, Uri, Method, StatusCode"
+license = "Apache-2.0 OR MIT"
+repository = "https://gitlab.com/kornelski/http-serde"
+homepage = "https://lib.rs/crates/http-serde"
+categories = ["encoding"]
+keywords = ["http", "serde", "deserialize", "status", "url"]
+readme = "README.md"
+
+[dependencies]
+serde = { version = "1.0.104", features = ["derive"] }
+http = "0.2.0"
+
+[dev-dependencies]
+serde_json = "1.0.47"
+bincode = "1.2.1"
