@@ -1,6 +1,6 @@
 [package]
 name = "http-serde"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Kornel <kornel@geekhood.net>"]
 edition = "2018"
 description = "Serde support for the http crate. (De)serialize HeaderMap, Uri, Method, StatusCode"
