@@ -1,4 +1,3 @@
-
 //! Adds ability to serialize and deserialize types from the [HTTP][http] crate.
 //!
 //! If you want to serialize `Request` or `Response`, use `into_parts()` and serialize their parts, and then rebuild them using their `Builder`.
@@ -37,6 +36,7 @@ pub mod header_map {
     use serde::de::{Deserializer, MapAccess, Unexpected, Visitor};
     use serde::ser::SerializeSeq;
     use serde::{Serialize, Serializer};
+    use std::borrow::Cow;
     use std::fmt;
 
     struct ToSeq<'a>(GetAll<'a, HeaderValue>);
@@ -74,9 +74,9 @@ pub mod header_map {
     #[derive(serde::Deserialize)]
     #[serde(untagged)]
     enum OneOrMore<'a> {
-        One(&'a str),
-        Strings(Vec<&'a str>),
-        Bytes(Vec<&'a [u8]>),
+        One(Cow<'a, str>),
+        Strings(Vec<Cow<'a, str>>),
+        Bytes(Vec<Cow<'a, [u8]>>),
     }
 
     struct HeaderMapVisitor {
@@ -98,9 +98,9 @@ pub mod header_map {
             let mut map = HeaderMap::with_capacity(access.size_hint().unwrap_or(0));
 
             if !self.is_human_readable {
-                while let Some((key, arr)) = access.next_entry::<&str, Vec<&[u8]>>()? {
+                while let Some((key, arr)) = access.next_entry::<Cow<str>, Vec<&[u8]>>()? {
                     let key = HeaderName::from_bytes(key.as_bytes())
-                        .map_err(|_| de::Error::invalid_value(Unexpected::Str(key), &self))?;
+                        .map_err(|_| de::Error::invalid_value(Unexpected::Str(&key), &self))?;
                     for val in arr {
                         let val = HeaderValue::from_bytes(&val).map_err(|_| {
                             de::Error::invalid_value(Unexpected::Bytes(&val), &self)
@@ -109,20 +109,20 @@ pub mod header_map {
                     }
                 }
             } else {
-                while let Some((key, val)) = access.next_entry::<&str, OneOrMore>()? {
+                while let Some((key, val)) = access.next_entry::<Cow<str>, OneOrMore>()? {
                     let key = HeaderName::from_bytes(key.as_bytes())
-                        .map_err(|_| de::Error::invalid_value(Unexpected::Str(key), &self))?;
+                        .map_err(|_| de::Error::invalid_value(Unexpected::Str(&key), &self))?;
                     match val {
                         OneOrMore::One(val) => {
                             let val = val.parse().map_err(|_| {
-                                de::Error::invalid_value(Unexpected::Str(val), &self)
+                                de::Error::invalid_value(Unexpected::Str(&val), &self)
                             })?;
                             map.insert(key, val);
                         }
                         OneOrMore::Strings(arr) => {
                             for val in arr {
                                 let val = val.parse().map_err(|_| {
-                                    de::Error::invalid_value(Unexpected::Str(val), &self)
+                                    de::Error::invalid_value(Unexpected::Str(&val), &self)
                                 })?;
                                 map.append(&key, val);
                             }

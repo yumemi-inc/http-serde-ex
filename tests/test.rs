@@ -1,8 +1,8 @@
-
 #[test]
 fn roundtrip() {
     use http::{HeaderMap, HeaderValue};
     use http::{Method, StatusCode, Uri};
+    use std::io;
 
     let mut map = HeaderMap::new();
     map.insert("hey", HeaderValue::from_static("ho"));
@@ -25,15 +25,31 @@ fn roundtrip() {
         StatusCode::NOT_MODIFIED,
     );
     let json = serde_json::to_string(&wrapped).unwrap();
+    let yaml = serde_yaml::to_string(&wrapped).unwrap();
     let bin = bincode::serialize(&wrapped).unwrap();
     assert_eq!(
         "[{\"hey\":\"ho\",\"foo\":\"bar\",\"multi-value\":[\"multi\",\"valued\"]},\"http://example.com/\",\"PUT\",304]",
         &json
     );
-    let back_js: Wrap = serde_json::from_str(&json).unwrap();
+    assert_eq!(
+        "---\n- hey: ho\n  foo: bar\n  multi-value:\n    - multi\n    - valued\n- \"http://example.com/\"\n- PUT\n- 304",
+        &yaml
+    );
+    let back_js_str: Wrap = serde_json::from_str(&json).unwrap();
+    let back_js_reader: Wrap = serde_json::from_reader(io::Cursor::new(json.as_bytes())).unwrap();
+    let back_yaml_str: Wrap = serde_yaml::from_str(&yaml).unwrap();
+    let back_yaml_reader: Wrap = serde_yaml::from_reader(io::Cursor::new(yaml.as_bytes())).unwrap();
     let back_bin: Wrap = bincode::deserialize(&bin).unwrap();
 
-    for back in [back_js, back_bin].iter() {
+    for back in [
+        back_js_str,
+        back_js_reader,
+        back_yaml_str,
+        back_yaml_reader,
+        back_bin,
+    ]
+    .iter()
+    {
         assert_eq!(back.0.get("hey").map(|s| s.as_bytes()).unwrap(), b"ho");
         assert_eq!(back.0.get("foo").map(|s| s.as_bytes()).unwrap(), b"bar");
         assert_eq!(
