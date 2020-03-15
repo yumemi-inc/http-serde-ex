@@ -15,9 +15,9 @@ You must annotate fields with `#[serde(with = "http_serde::<appropriate method>"
 #[derive(Serialize, Deserialize)]
 struct MyStruct {
     #[serde(with = "http_serde::method")]
-    status: Method,
+    method: Method,
 
-    #[serde(with = "http_serde::status")]
+    #[serde(with = "http_serde::status_code")]
     status: StatusCode,
 
     #[serde(with = "http_serde::uri")]
@@ -30,5 +30,5 @@ struct MyStruct {
 
 ## Requirements
 
-Tested with Rust 1.41.
+* Rust 1.41 or later.
 

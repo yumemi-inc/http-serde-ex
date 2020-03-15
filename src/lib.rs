@@ -10,12 +10,15 @@
 //! You must annotate fields with `#[serde(with = "http_serde::<appropriate method>")]`.
 //!
 //! ```rust
+//! # use serde::*;
+//! # use http::*;
+//! # use ::http_serde;
 //! #[derive(Serialize, Deserialize)]
 //! struct MyStruct {
 //!     #[serde(with = "http_serde::method")]
-//!     status: Method,
+//!     method: Method,
 //!
-//!     #[serde(with = "http_serde::status")]
+//!     #[serde(with = "http_serde::status_code")]
 //!     status: StatusCode,
 //!
 //!     #[serde(with = "http_serde::uri")]
