@@ -263,6 +263,7 @@ pub mod uri {
     use serde::de;
     use serde::de::{Unexpected, Visitor};
     use serde::{Deserializer, Serializer};
+    use std::convert::TryInto;
     use std::fmt;
 
     /// Implementation detail. Use derive annotations instead.
@@ -281,6 +282,10 @@ pub mod uri {
         fn visit_str<E: de::Error>(self, val: &str) -> Result<Self::Value, E> {
             val.parse()
                 .map_err(|_| de::Error::invalid_value(Unexpected::Str(val), &self))
+        }
+
+        fn visit_string<E: de::Error>(self, val: String) -> Result<Self::Value, E> {
+            val.try_into().map_err(de::Error::custom)
         }
     }
 
