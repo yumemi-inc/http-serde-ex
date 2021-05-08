@@ -32,7 +32,7 @@ fn roundtrip() {
         &json
     );
     assert_eq!(
-        "---\n- hey: ho\n  foo: bar\n  multi-value:\n    - multi\n    - valued\n- \"http://example.com/\"\n- PUT\n- 304",
+        "---\n- hey: ho\n  foo: bar\n  multi-value:\n    - multi\n    - valued\n- \"http://example.com/\"\n- PUT\n- 304\n",
         &yaml
     );
     let back_js_str: Wrap = serde_json::from_str(&json).unwrap();
