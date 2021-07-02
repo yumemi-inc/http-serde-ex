@@ -26,6 +26,7 @@ fn roundtrip() {
     );
     let json = serde_json::to_string(&wrapped).unwrap();
     let yaml = serde_yaml::to_string(&wrapped).unwrap();
+    let cbor = serde_cbor::to_vec(&wrapped).unwrap();
     let bin = bincode::serialize(&wrapped).unwrap();
     assert_eq!(
         "[{\"hey\":\"ho\",\"foo\":\"bar\",\"multi-value\":[\"multi\",\"valued\"]},\"http://example.com/\",\"PUT\",304]",
@@ -39,6 +40,7 @@ fn roundtrip() {
     let back_js_reader: Wrap = serde_json::from_reader(io::Cursor::new(json.as_bytes())).unwrap();
     let back_yaml_str: Wrap = serde_yaml::from_str(&yaml).unwrap();
     let back_yaml_reader: Wrap = serde_yaml::from_reader(io::Cursor::new(yaml.as_bytes())).unwrap();
+    let back_cbor: Wrap = serde_cbor::from_slice(&cbor).unwrap();
     let back_bin: Wrap = bincode::deserialize(&bin).unwrap();
 
     for back in [
@@ -46,6 +48,7 @@ fn roundtrip() {
         back_js_reader,
         back_yaml_str,
         back_yaml_reader,
+        back_cbor,
         back_bin,
     ]
     .iter()
