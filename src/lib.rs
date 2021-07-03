@@ -101,7 +101,7 @@ pub mod header_map {
             let mut map = HeaderMap::with_capacity(access.size_hint().unwrap_or(0));
 
             if !self.is_human_readable {
-                while let Some((key, arr)) = access.next_entry::<Cow<str>, Vec<&[u8]>>()? {
+                while let Some((key, arr)) = access.next_entry::<Cow<str>, Vec<Cow<[u8]>>>()? {
                     let key = HeaderName::from_bytes(key.as_bytes())
                         .map_err(|_| de::Error::invalid_value(Unexpected::Str(&key), &self))?;
                     for val in arr {

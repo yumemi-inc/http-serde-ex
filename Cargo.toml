@@ -19,6 +19,7 @@ http = "0.2.0"
 serde_json = "1.0.47"
 serde_yaml = "0.8.16"
 bincode = "1.2.1"
+serde_cbor = "0.11.1"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
