@@ -25,6 +25,9 @@ struct MyStruct {
 
     #[serde(with = "http_serde::header_map")]
     headers: HeaderMap,
+
+    #[serde(with = "http_serde::authority")]
+    authority: Authority,
 }
 ```
 
