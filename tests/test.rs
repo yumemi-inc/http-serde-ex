@@ -1,7 +1,7 @@
 #[test]
 fn roundtrip() {
     use http::{HeaderMap, HeaderValue};
-    use http::{Method, StatusCode, Uri};
+    use http::{Method, StatusCode, Uri, uri::Authority};
     use std::io;
 
     let mut map = HeaderMap::new();
@@ -16,6 +16,7 @@ fn roundtrip() {
         #[serde(with = "http_serde::uri")] Uri,
         #[serde(with = "http_serde::method")] Method,
         #[serde(with = "http_serde::status_code")] StatusCode,
+        #[serde(with = "http_serde::authority")] Authority,
     );
 
     let wrapped = Wrap(
@@ -23,17 +24,18 @@ fn roundtrip() {
         "http://example.com/".parse().unwrap(),
         Method::PUT,
         StatusCode::NOT_MODIFIED,
+        "example.com:8080".parse().unwrap(),
     );
     let json = serde_json::to_string(&wrapped).unwrap();
     let yaml = serde_yaml::to_string(&wrapped).unwrap();
     let cbor = serde_cbor::to_vec(&wrapped).unwrap();
     let bin = bincode::serialize(&wrapped).unwrap();
     assert_eq!(
-        "[{\"hey\":\"ho\",\"foo\":\"bar\",\"multi-value\":[\"multi\",\"valued\"]},\"http://example.com/\",\"PUT\",304]",
+        "[{\"hey\":\"ho\",\"foo\":\"bar\",\"multi-value\":[\"multi\",\"valued\"]},\"http://example.com/\",\"PUT\",304,\"example.com:8080\"]",
         &json
     );
     assert_eq!(
-        "---\n- hey: ho\n  foo: bar\n  multi-value:\n    - multi\n    - valued\n- \"http://example.com/\"\n- PUT\n- 304\n",
+        "---\n- hey: ho\n  foo: bar\n  multi-value:\n    - multi\n    - valued\n- \"http://example.com/\"\n- PUT\n- 304\n- \"example.com:8080\"\n",
         &yaml
     );
     let back_js_str: Wrap = serde_json::from_str(&json).unwrap();
@@ -68,5 +70,6 @@ fn roundtrip() {
         assert_eq!(&back.1.to_string(), "http://example.com/");
         assert_eq!(back.2, Method::PUT);
         assert_eq!(back.3, StatusCode::NOT_MODIFIED);
+        assert_eq!(&back.4.to_string(), "example.com:8080");
     }
 }

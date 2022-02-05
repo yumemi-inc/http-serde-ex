@@ -12,6 +12,7 @@
 //! ```rust
 //! # use serde::*;
 //! # use http::*;
+//! # use http::uri::*;
 //! # use ::http_serde;
 //! #[derive(Serialize, Deserialize)]
 //! struct MyStruct {
@@ -26,6 +27,9 @@
 //!
 //!     #[serde(with = "http_serde::header_map")]
 //!     headers: HeaderMap,
+//!
+//!     #[serde(with = "http_serde::authority")]
+//!     authority: Authority,
 //! }
 //! ```
 
@@ -291,9 +295,52 @@ pub mod uri {
 
     /// Implementation detail.
     pub fn deserialize<'de, D>(de: D) -> Result<Uri, D::Error>
+        where
+            D: Deserializer<'de>,
+    {
+        de.deserialize_str(UriVisitor)
+    }
+}
+
+/// For `http::uri::Authority`
+///
+/// `#[serde(with = "http_serde::authority")]`
+pub mod authority {
+    use http::uri::Authority;
+    use serde::de;
+    use serde::de::{Unexpected, Visitor};
+    use serde::{Deserializer, Serializer};
+    use std::convert::TryInto;
+    use std::fmt;
+
+    /// Implementation detail. Use derive annotations instead.
+    pub fn serialize<S: Serializer>(authority: &Authority, ser: S) -> Result<S::Ok, S::Error> {
+        ser.collect_str(&authority)
+    }
+
+    struct AuthorityVisitor;
+    impl<'de> Visitor<'de> for AuthorityVisitor {
+        type Value = Authority;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            write!(formatter, "valid authority")
+        }
+
+        fn visit_str<E: de::Error>(self, val: &str) -> Result<Self::Value, E> {
+            val.parse()
+                .map_err(|_| de::Error::invalid_value(Unexpected::Str(val), &self))
+        }
+
+        fn visit_string<E: de::Error>(self, val: String) -> Result<Self::Value, E> {
+            val.try_into().map_err(de::Error::custom)
+        }
+    }
+
+    /// Implementation detail.
+    pub fn deserialize<'de, D>(de: D) -> Result<Authority, D::Error>
     where
         D: Deserializer<'de>,
     {
-        de.deserialize_str(UriVisitor)
+        de.deserialize_str(AuthorityVisitor)
     }
 }
