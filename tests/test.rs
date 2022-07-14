@@ -76,3 +76,109 @@ fn roundtrip() {
         assert_eq!(format!("{:?}", back.5), "HTTP/2.0");
     }
 }
+
+#[test]
+fn option_header_map() {
+    use http::{HeaderMap, HeaderValue};
+
+    #[derive(serde::Serialize, serde::Deserialize)]
+    struct Wrap(
+        #[serde(with = "http_serde::option::header_map")]
+        Option<HeaderMap>,
+    );
+
+    let mut map = HeaderMap::new();
+    map.insert("Authorization", HeaderValue::from_str("Bearer").unwrap());
+
+    let wrap = Wrap(Some(map));
+    assert_eq!(r#"{"authorization":"Bearer"}"#.to_owned(), serde_json::to_string(&wrap).unwrap());
+
+    let wrap = Wrap(None);
+    assert_eq!("null".to_owned(), serde_json::to_string(&wrap).unwrap());
+}
+
+#[test]
+fn option_status_code() {
+    use http::StatusCode;
+
+    #[derive(serde::Serialize, serde::Deserialize)]
+    struct Wrap(
+        #[serde(with = "http_serde::option::status_code")]
+        Option<StatusCode>,
+    );
+
+    let wrap = Wrap(Some(StatusCode::OK));
+    assert_eq!("200".to_owned(), serde_json::to_string(&wrap).unwrap());
+
+    let wrap = Wrap(None);
+    assert_eq!("null".to_owned(), serde_json::to_string(&wrap).unwrap());
+}
+
+#[test]
+fn option_method() {
+    use http::Method;
+
+    #[derive(serde::Serialize, serde::Deserialize)]
+    struct Wrap(
+        #[serde(with = "http_serde::option::method")]
+        Option<Method>,
+    );
+
+    let wrap = Wrap(Some(Method::POST));
+    assert_eq!(r#""POST""#.to_owned(), serde_json::to_string(&wrap).unwrap());
+
+    let wrap = Wrap(None);
+    assert_eq!("null".to_owned(), serde_json::to_string(&wrap).unwrap());
+}
+
+#[test]
+fn option_uri() {
+    use http::Uri;
+
+    #[derive(serde::Serialize, serde::Deserialize)]
+    struct Wrap(
+        #[serde(with = "http_serde::option::uri")]
+        Option<Uri>,
+    );
+
+    let wrap = Wrap(Some("https://example.com/".parse().unwrap()));
+    assert_eq!(r#""https://example.com/""#.to_owned(), serde_json::to_string(&wrap).unwrap());
+
+    let wrap = Wrap(None);
+    assert_eq!("null".to_owned(), serde_json::to_string(&wrap).unwrap());
+}
+
+#[test]
+fn option_authority() {
+    use std::str::FromStr;
+    use http::uri::Authority;
+
+    #[derive(serde::Serialize, serde::Deserialize)]
+    struct Wrap(
+        #[serde(with = "http_serde::option::authority")]
+        Option<Authority>,
+    );
+
+    let wrap = Wrap(Some(Authority::from_str("example.com").unwrap()));
+    assert_eq!(r#""example.com""#.to_owned(), serde_json::to_string(&wrap).unwrap());
+
+    let wrap = Wrap(None);
+    assert_eq!("null".to_owned(), serde_json::to_string(&wrap).unwrap());
+}
+
+#[test]
+fn option_version() {
+    use http::Version;
+
+    #[derive(serde::Serialize, serde::Deserialize)]
+    struct Wrap(
+        #[serde(with = "http_serde::option::version")]
+        Option<Version>,
+    );
+
+    let wrap = Wrap(Some(Version::HTTP_11));
+    assert_eq!(r#""HTTP/1.1""#.to_owned(), serde_json::to_string(&wrap).unwrap());
+
+    let wrap = Wrap(None);
+    assert_eq!("null".to_owned(), serde_json::to_string(&wrap).unwrap());
+}
