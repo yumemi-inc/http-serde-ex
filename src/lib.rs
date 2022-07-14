@@ -33,6 +33,8 @@
 //! }
 //! ```
 
+pub mod option;
+
 /// For `http::HeaderMap`
 ///
 /// `#[serde(with = "http_serde::header_map")]`
@@ -87,8 +89,8 @@ pub mod header_map {
         Bytes(Vec<Cow<'a, [u8]>>),
     }
 
-    struct HeaderMapVisitor {
-        is_human_readable: bool,
+    pub(crate) struct HeaderMapVisitor {
+        pub(crate) is_human_readable: bool,
     }
 
     impl<'de> Visitor<'de> for HeaderMapVisitor {
@@ -175,7 +177,7 @@ pub mod status_code {
         ser.serialize_u16(status.as_u16())
     }
 
-    struct StatusVisitor;
+    pub(crate) struct StatusVisitor;
 
     impl<'de> Visitor<'de> for StatusVisitor {
         type Value = StatusCode;
@@ -238,7 +240,7 @@ pub mod method {
         ser.serialize_str(method.as_str())
     }
 
-    struct MethodVisitor;
+    pub(crate) struct MethodVisitor;
 
     impl<'de> Visitor<'de> for MethodVisitor {
         type Value = Method;
@@ -278,7 +280,7 @@ pub mod uri {
         ser.collect_str(&uri)
     }
 
-    struct UriVisitor;
+    pub(crate) struct UriVisitor;
 
     impl<'de> Visitor<'de> for UriVisitor {
         type Value = Uri;
@@ -322,7 +324,7 @@ pub mod authority {
         ser.collect_str(&authority)
     }
 
-    struct AuthorityVisitor;
+    pub(crate) struct AuthorityVisitor;
 
     impl<'de> Visitor<'de> for AuthorityVisitor {
         type Value = Authority;
@@ -363,7 +365,7 @@ pub mod version {
         ser.serialize_str(format!("{:?}", version).as_str())
     }
 
-    struct VersionVisitor;
+    pub(crate) struct VersionVisitor;
 
     impl<'de> Visitor<'de> for VersionVisitor {
         type Value = Version;
