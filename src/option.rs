@@ -1,4 +1,34 @@
 //! For `Option<http::*>`
+//!
+//! ## Usage
+//!
+//! You must annotate fields with `#[serde(with = "http_serde::option::<appropriate method>")]`.
+//!
+//! ```rust
+//! use http::*;
+//! use serde::{Serialize, Deserialize};
+//!
+//! #[derive(Serialize, Deserialize)]
+//! struct MyStruct {
+//!     #[serde(with = "http_serde::option::header_map")]
+//!     headers: Option<HeaderMap>,
+//!
+//!     #[serde(with = "http_serde::option::status_code")]
+//!     status: Option<StatusCode>,
+//!
+//!     #[serde(with = "http_serde::option::method")]
+//!     method: Option<Method>,
+//!
+//!     #[serde(with = "http_serde::option::uri")]
+//!     uri: Option<Uri>,
+//!
+//!     #[serde(with = "http_serde::option::authority")]
+//!     authority: Option<uri::Authority>,
+//!
+//!     #[serde(with = "http_serde::option::version")]
+//!     version: Option<Version>,
+//! }
+//! ```
 
 use serde::de::{Error, MapAccess, Visitor};
 use serde::{Deserializer, Serializer};
